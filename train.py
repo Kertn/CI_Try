@@ -25,10 +25,17 @@ def train():
     X_train, X_test, y_train, y_test = load_data()
     clf = DecisionTreeClassifier(random_state=42)
     clf.fit(X_train, y_train)
+
     acc = accuracy_score(y_test, clf.predict(X_test))
     logging.info("Validation accuracy = %.4f", acc)
 
-    # persist model and test set for downstream evaluation
+    # 1️⃣ save model
+    joblib.dump(clf, MODEL_PATH)
+
+    # 2️⃣ save hold-out set so evaluate.py can load it
+    joblib.dump({"X_test": X_test, "y_test": y_test}, TEST_PATH)
+
+    # 3️⃣ write metrics file (the part you added)
     metrics = {
         "timestamp": datetime.utcnow().isoformat(timespec="seconds") + "Z",
         "model": "DecisionTreeClassifier",
@@ -37,7 +44,6 @@ def train():
     }
     METRICS_PATH = MODEL_DIR / "metrics.json"
     METRICS_PATH.write_text(json.dumps(metrics, indent=2))
-    logging.info("Wrote metrics to %s", METRICS_PATH)
 
     return acc
 
