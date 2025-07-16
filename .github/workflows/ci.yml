@@ -28,6 +28,22 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}     # <-- add this line
         run: pytest -q
 
+      - name: Upload metrics
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-metrics
+          path: artifacts/metrics.json
+
+      - name: Add accuracy to job summary
+        if: success()
+        run: |
+          ACC=$(jq '.accuracy' artifacts/metrics.json)
+          echo "### Model Metrics" >> $GITHUB_STEP_SUMMARY
+          echo "| metric | value |"    >> $GITHUB_STEP_SUMMARY
+          echo "| ------ | ----- |"    >> $GITHUB_STEP_SUMMARY
+          echo "| accuracy | $ACC |"  >> $GITHUB_STEP_SUMMARY
+
       # ---- CD step: build & upload artifact only if tests pass ----
 #      - name: Package model artifact
 #        if: success()
