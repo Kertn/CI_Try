@@ -24,6 +24,8 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Pytest (unit + acceptance)
+        env:
+          PYTHONPATH: ${{ github.workspace }}     # <-- add this line
         run: pytest -q
 
       # ---- CD step: build & upload artifact only if tests pass ----
